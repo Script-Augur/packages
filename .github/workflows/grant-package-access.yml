@@ -2,34 +2,45 @@ name: Grant package access
 
 on:
   workflow_dispatch:
-    inputs:
-      repository:
-        description: 'org/repo to grant read access'
-        required: true
-        default: 'Script-Augur/tanstack-convex-template'
 
 permissions:
   packages: write
   contents: read
 
 jobs:
-  grant:
+  publish-public:
     runs-on: ubuntu-latest
     steps:
-      - name: Grant repository access to each package
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-script-augur
+        with:
+          cache: 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: pnpm install --frozen-lockfile
+      - name: Publish packages as public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          for pkg in packages/*/package.json; do
+            dir=$(dirname "$pkg")
+            name=$(node -p "require('./$pkg').name")
+            echo "Publishing $name from $dir (public)..."
+            (cd "$dir" && pnpm publish --no-git-checks --access public)
+          done
+          exit 0
+      - name: Set package visibility public
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET: ${{ inputs.repository }}
         run: |
-          set -euo pipefail
-          REPO_ID=$(gh api "repos/$TARGET" --jq .id)
-          echo "Target $TARGET id=$REPO_ID"
           for pkg in tsconfig prettier-config eslint-config eslint-plugin-module-ordering vite-plugin-image-gen vite-plugin-svg-sprite; do
-            echo "Granting read on @script-augur/$pkg ..."
-            gh api -X PUT \
-              "orgs/Script-Augur/packages/npm/$pkg/repositories/$REPO_ID" \
-              -f permission=read || \
-            gh api -X PUT \
-              "orgs/Script-Augur/packages/npm/$pkg/repositories/$REPO_ID" || true
-            gh api "orgs/Script-Augur/packages/npm/$pkg" --jq '{name,visibility,repository_url:.repository.html_url}' || true
+            echo "Visibility for $pkg:"
+            gh api -X POST "orgs/Script-Augur/packages/npm/$pkg/visibility" \
+              -f visibility=public || \
+            gh api --method PUT "user/packages/npm/$pkg/visibility" \
+              -f visibility=public || true
+            gh api "orgs/Script-Augur/packages/npm/$pkg" --jq '{name,visibility}' || true
           done

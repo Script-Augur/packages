@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/eslint-config",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Shareable ESLint flat config for Script-Augur TanStack + Convex apps",
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "main": "./index.js",
   "exports": {

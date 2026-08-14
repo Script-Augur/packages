@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/vite-plugin-image-gen",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Vite plugin that generates optimized image variants from query-string presets at import time",
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
