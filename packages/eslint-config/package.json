@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/eslint-config",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Shareable ESLint flat config for Script-Augur TanStack + Convex apps",
   "type": "module",
   "license": "MIT",
@@ -23,10 +23,9 @@
   "scripts": {
     "build": "node -e \"process.exit(0)\""
   },
-  "dependencies": {
-    "@script-augur/eslint-plugin-module-ordering": "^0.2.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
+    "@script-augur/eslint-plugin-module-ordering": ">=0.2.0",
     "@convex-dev/eslint-plugin": ">=1",
     "@tanstack/eslint-config": ">=0.3",
     "eslint": ">=9",
