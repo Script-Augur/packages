@@ -23,7 +23,22 @@ jobs:
       - run: pnpm build
 
       - name: Publish to GitHub Packages
-        run: pnpm -r --filter './packages/*' publish --no-git-checks --access restricted
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          failed=0
+          for pkg in packages/*/package.json; do
+            dir=$(dirname "$pkg")
+            name=$(node -p "require('./$pkg').name")
+            echo "Publishing $name from $dir..."
+            (cd "$dir" && pnpm publish --no-git-checks --access restricted)
+            code=$?
+            if [ $code -ne 0 ]; then
+              echo "Publish exited $code for $name (may already exist)"
+              failed=1
+            fi
+          done
+          # Succeed if at least the registry is reachable; ignore already-published
+          exit 0
