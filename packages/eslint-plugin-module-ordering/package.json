@@ -1,0 +1,32 @@
+{
+  "name": "@script-augur/eslint-plugin-module-ordering",
+  "version": "0.1.0",
+  "description": "ESLint plugin that enforces module section order (imports, constants, exports, functions, types)",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Script-Augur/packages.git",
+    "directory": "packages/eslint-plugin-module-ordering"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": ["src/index.mjs"],
+  "scripts": {
+    "test": "node --test src/index.test.mjs",
+    "build": "node -e \"process.exit(0)\""
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0",
+    "typescript-eslint": "^8.33.1"
+  }
+}

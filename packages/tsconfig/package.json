@@ -1,0 +1,19 @@
+{
+  "name": "@script-augur/tsconfig",
+  "version": "0.1.0",
+  "description": "Shared TypeScript configs for Script-Augur apps and libraries",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Script-Augur/packages.git",
+    "directory": "packages/tsconfig"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "files": ["base.json", "library.json", "app.json"],
+  "scripts": {
+    "build": "node -e \"process.exit(0)\""
+  }
+}

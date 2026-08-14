@@ -1,0 +1,28 @@
+{
+  "name": "@script-augur/prettier-config",
+  "version": "0.1.0",
+  "description": "Shared Prettier config for Script-Augur (formatting + Tailwind class sort only)",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Script-Augur/packages.git",
+    "directory": "packages/prettier-config"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "main": "./index.json",
+  "exports": {
+    ".": "./index.json"
+  },
+  "files": ["index.json"],
+  "scripts": {
+    "build": "node -e \"process.exit(0)\""
+  },
+  "peerDependencies": {
+    "prettier": ">=3",
+    "prettier-plugin-tailwindcss": ">=0.6"
+  }
+}
