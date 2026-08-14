@@ -1,0 +1,35 @@
+name: Grant package access
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'org/repo to grant read access'
+        required: true
+        default: 'Script-Augur/tanstack-convex-template'
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  grant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Grant repository access to each package
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ inputs.repository }}
+        run: |
+          set -euo pipefail
+          REPO_ID=$(gh api "repos/$TARGET" --jq .id)
+          echo "Target $TARGET id=$REPO_ID"
+          for pkg in tsconfig prettier-config eslint-config eslint-plugin-module-ordering vite-plugin-image-gen vite-plugin-svg-sprite; do
+            echo "Granting read on @script-augur/$pkg ..."
+            gh api -X PUT \
+              "orgs/Script-Augur/packages/npm/$pkg/repositories/$REPO_ID" \
+              -f permission=read || \
+            gh api -X PUT \
+              "orgs/Script-Augur/packages/npm/$pkg/repositories/$REPO_ID" || true
+            gh api "orgs/Script-Augur/packages/npm/$pkg" --jq '{name,visibility,repository_url:.repository.html_url}' || true
+          done
