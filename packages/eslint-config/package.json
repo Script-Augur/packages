@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/eslint-config",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Shareable ESLint flat config for Script-Augur TanStack + Convex apps",
   "type": "module",
   "license": "MIT",
