@@ -28,13 +28,16 @@ runs:
     - name: Export package auth env
       shell: bash
       run: |
-        if [ -z "${NPM_TOKEN:-}" ] && [ -n "${NODE_AUTH_TOKEN:-}" ]; then
-          echo "NPM_TOKEN=${NODE_AUTH_TOKEN}" >> "$GITHUB_ENV"
+        TOKEN="${NPM_TOKEN:-${NODE_AUTH_TOKEN:-${GITHUB_TOKEN:-}}}"
+        if [ -z "$TOKEN" ]; then
+          echo "Warning: no NPM_TOKEN, NODE_AUTH_TOKEN, or GITHUB_TOKEN for GitHub Packages"
+          exit 0
         fi
-        if [ -z "${NODE_AUTH_TOKEN:-}" ] && [ -n "${NPM_TOKEN:-}" ]; then
-          echo "NODE_AUTH_TOKEN=${NPM_TOKEN}" >> "$GITHUB_ENV"
-        fi
-        if [ -z "${NPM_TOKEN:-}" ] && [ -z "${NODE_AUTH_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ]; then
-          echo "NPM_TOKEN=${GITHUB_TOKEN}" >> "$GITHUB_ENV"
-          echo "NODE_AUTH_TOKEN=${GITHUB_TOKEN}" >> "$GITHUB_ENV"
-        fi
+        echo "NPM_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+        echo "NODE_AUTH_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+        # Ensure project .npmrc ${NPM_TOKEN} expands for this job
+        mkdir -p "$HOME"
+        {
+          echo "@script-augur:registry=https://npm.pkg.github.com"
+          echo "//npm.pkg.github.com/:_authToken=${TOKEN}"
+        } >> "$HOME/.npmrc"
