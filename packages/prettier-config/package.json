@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/prettier-config",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared Prettier config for Script-Augur (formatting + Tailwind class sort only)",
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,9 @@
   "exports": {
     ".": "./index.json"
   },
-  "files": ["index.json"],
+  "files": [
+    "index.json"
+  ],
   "scripts": {
     "build": "node -e \"process.exit(0)\""
   },

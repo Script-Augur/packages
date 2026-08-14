@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/eslint-config",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shareable ESLint flat config for Script-Augur TanStack + Convex apps",
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,9 @@
   "exports": {
     ".": "./index.js"
   },
-  "files": ["index.js"],
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "build": "node -e \"process.exit(0)\""
   },

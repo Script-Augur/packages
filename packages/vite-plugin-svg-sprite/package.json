@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/vite-plugin-svg-sprite",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vite plugin that builds an SVG sprite, optional SVGO, and TypeScript symbol ID types",
   "type": "module",
   "license": "MIT",
@@ -15,7 +15,9 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

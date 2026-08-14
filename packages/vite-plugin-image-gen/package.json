@@ -1,6 +1,6 @@
 {
   "name": "@script-augur/vite-plugin-image-gen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vite plugin that generates optimized image variants from query-string presets at import time",
   "type": "module",
   "license": "MIT",
@@ -16,7 +16,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
