@@ -35,7 +35,6 @@
   "scripts": {
     "build": "tsup src/index.ts src/presets.ts --format cjs,esm --dts --clean",
     "typecheck": "tsc --noEmit",
-    "prepare": undefined,
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
@@ -44,9 +43,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
+    "rollup": "^4.34.8",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
-    "vite": "^6.3.5"
+    "vite": "^5.4.19"
   },
   "peerDependencies": {
     "vite": ">=5"
