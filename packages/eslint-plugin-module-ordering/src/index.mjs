@@ -1,4 +1,7 @@
 /** @typedef {import('eslint').Rule.RuleModule} RuleModule */
+/** @typedef {import('eslint').SourceCode} SourceCode */
+/** @typedef {import('estree').Statement} Statement */
+/** @typedef {import('estree').Comment} Comment */
 
 /** @type {Record<string, number>} */
 const SECTION_INDEX = {
@@ -184,6 +187,138 @@ function shouldSkipFile(filename) {
   )
 }
 
+/**
+ * Leading comments owned by `statement` (after `previousEnd`), keeping only the
+ * contiguous block immediately above the statement. A blank line stops the walk
+ * so file headers stay put when the first declaration moves.
+ *
+ * @param {SourceCode} sourceCode
+ * @param {Statement} statement
+ * @param {number} previousEnd
+ * @returns {Comment[]}
+ */
+function getOwnedLeadingComments(sourceCode, statement, previousEnd) {
+  const candidates = sourceCode
+    .getCommentsBefore(statement)
+    .filter(comment => comment.range[0] >= previousEnd)
+
+  if (candidates.length === 0) {
+    return []
+  }
+
+  /** @type {Comment[]} */
+  const owned = []
+  let boundary = statement.range[0]
+
+  for (let index = candidates.length - 1; index >= 0; index--) {
+    const comment = candidates[index]
+    const gap = sourceCode.text.slice(comment.range[1], boundary)
+    if (!/^\s*$/.test(gap) || /\n[ \t]*\n/.test(gap)) {
+      break
+    }
+    owned.unshift(comment)
+    boundary = comment.range[0]
+  }
+
+  return owned
+}
+
+/**
+ * Trailing comments on the same line as the statement end (e.g. `f() {} // note`).
+ * Block/JSDoc comments on later lines belong to the following statement.
+ *
+ * @param {SourceCode} sourceCode
+ * @param {Statement} statement
+ * @returns {Comment[]}
+ */
+function getOwnedTrailingComments(sourceCode, statement) {
+  const endLine = statement.loc?.end.line
+  if (endLine == null) {
+    return []
+  }
+
+  return sourceCode.getCommentsAfter(statement).filter(comment => {
+    return comment.loc?.start.line === endLine
+  })
+}
+
+/**
+ * Source range for a statement including owned leading/trailing comments.
+ *
+ * @param {SourceCode} sourceCode
+ * @param {Statement} statement
+ * @param {number} previousEnd
+ * @returns {[number, number]}
+ */
+function getStatementSourceRange(sourceCode, statement, previousEnd) {
+  const leading = getOwnedLeadingComments(sourceCode, statement, previousEnd)
+  const trailing = getOwnedTrailingComments(sourceCode, statement)
+
+  const start =
+    leading.length > 0 ? leading[0].range[0] : statement.range[0]
+  const end =
+    trailing.length > 0
+      ? trailing[trailing.length - 1].range[1]
+      : statement.range[1]
+
+  return [start, end]
+}
+
+/**
+ * Map each body statement to its full source slice (comments + code).
+ *
+ * @param {SourceCode} sourceCode
+ * @param {Statement[]} body
+ * @returns {Map<Statement, string>}
+ */
+function getStatementTexts(sourceCode, body) {
+  /** @type {Map<Statement, string>} */
+  const texts = new Map()
+  let previousEnd = 0
+
+  for (const statement of body) {
+    const [start, end] = getStatementSourceRange(
+      sourceCode,
+      statement,
+      previousEnd
+    )
+    texts.set(statement, sourceCode.text.slice(start, end))
+    previousEnd = end
+  }
+
+  return texts
+}
+
+/**
+ * Replace range covering every statement and their owned comments.
+ *
+ * @param {SourceCode} sourceCode
+ * @param {Statement[]} body
+ * @returns {[number, number]}
+ */
+function getBodyReplaceRange(sourceCode, body) {
+  let previousEnd = 0
+  let start = body[0].range[0]
+  let end = body[body.length - 1].range[1]
+
+  for (let index = 0; index < body.length; index++) {
+    const [statementStart, statementEnd] = getStatementSourceRange(
+      sourceCode,
+      body[index],
+      previousEnd
+    )
+    if (index === 0) {
+      start = statementStart
+    }
+    if (index === body.length - 1) {
+      end = statementEnd
+    }
+    previousEnd = statementEnd
+  }
+
+  return [start, end]
+}
+
 /** @type {RuleModule} */
 const moduleOrderingRule = {
   meta: {
@@ -229,10 +364,10 @@ const moduleOrderingRule = {
           return {
             ...descriptor,
             fix(fixer) {
-              const start = node.body[0].range[0]
-              const end = node.body[node.body.length - 1].range[1]
+              const texts = getStatementTexts(sourceCode, node.body)
+              const [start, end] = getBodyReplaceRange(sourceCode, node.body)
               const text = reordered
-                .map(statement => sourceCode.getText(statement))
+                .map(statement => texts.get(statement) ?? sourceCode.getText(statement))
                 .join('\n')
               return fixer.replaceTextRange([start, end], text)
             },
